@@ -1,9 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import pandas as pd
+import os
 
 from app.message_generator import generate_message
 
 BIRTHDAY_FILE = "birthdays.xlsx"
+PLANNED_FILE = "logs/planned_messages.csv"
 
 
 def get_upcoming_birthdays(days_ahead=7):
@@ -58,5 +60,9 @@ def generate_planned_messages():
         messages.append(message)
 
     upcoming["Planned Message"] = messages
+
+    # Save planned messages
+    os.makedirs("logs", exist_ok=True)
+    upcoming.to_csv(PLANNED_FILE, index=False)
 
     return upcoming

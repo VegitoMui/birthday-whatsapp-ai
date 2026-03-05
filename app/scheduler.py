@@ -2,22 +2,31 @@ import time
 import schedule
 
 from app.birthday_graph import run_birthday_graph
-
+from app.birthday_planner import generate_planned_messages
 
 def run_birthday_bot():
 
     print("-------------------------------------------------")
     print("Scheduler triggered")
 
-    try:
+    # Run planning agent
+    print("Running birthday planning agent...")
 
-        run_birthday_graph()
+    planned = generate_planned_messages()
 
-        print("Birthday agent finished")
+    if not planned.empty:
+        print("Upcoming birthdays planned:")
+        print(planned)
 
-    except Exception as e:
+    else:
+        print("No upcoming birthdays to plan.")
 
-        print("Error running birthday agent:", e)
+    # Run messaging agent
+    print("Running birthday messaging agent...")
+
+    run_birthday_graph()
+
+    print("Scheduler cycle completed")
 
 
 # Run once immediately
