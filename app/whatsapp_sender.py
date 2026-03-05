@@ -1,5 +1,6 @@
 import time
 import urllib.parse
+import os
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -8,10 +9,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 def start_whatsapp_session():
 
     options = webdriver.ChromeOptions()
     options.add_argument("--start-maximized")
+
+    # Create session folder if it doesn't exist
+    session_path = os.path.join(os.getcwd(), "session", "whatsapp_profile")
+    os.makedirs(session_path, exist_ok=True)
+
+    # Persist login session
+    options.add_argument(f"user-data-dir={session_path}")
 
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
@@ -20,11 +29,11 @@ def start_whatsapp_session():
 
     driver.get("https://web.whatsapp.com")
 
-    print("Please scan QR code if not logged in")
+    print("Checking WhatsApp login status...")
 
     wait = WebDriverWait(driver, 120)
 
-    # Wait until the chat sidebar appears (means WhatsApp fully loaded)
+    # Wait until chat sidebar loads
     wait.until(
         EC.presence_of_element_located((By.ID, "pane-side"))
     )
@@ -32,6 +41,7 @@ def start_whatsapp_session():
     print("WhatsApp ready")
 
     return driver
+
 
 def send_message(driver, phone, message):
 
@@ -55,5 +65,4 @@ def send_message(driver, phone, message):
 
 
 def close_whatsapp_session(driver):
-
     driver.quit()
