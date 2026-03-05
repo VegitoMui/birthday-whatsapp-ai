@@ -11,18 +11,39 @@ def generate_message(name, relationship, tone):
     """
 
     prompt = f"""
-    Write a {tone} birthday wish for my {relationship} named {name}.
-    Keep it under 80 words.
-    Add emojis appropriately.
-    Make it warm and natural.
-    """
+You are writing a birthday message that will be sent on WhatsApp.
+
+Person Name: {name}
+Relationship: {relationship}
+Tone: {tone}
+
+Guidelines:
+- Sound like a real human texting, not a greeting card.
+- Keep it short (1–2 sentences).
+- Use natural emojis (1–2).
+- Avoid formal phrases like "Wishing you a very happy birthday".
+- Make it warm, friendly and personal.
+- Do not use quotes or hashtags.
+
+Examples:
+
+Funny friend:
+Happy birthday Rahul! Hope your cake is bigger than your problems today 😂🎂
+
+Professional:
+Happy birthday Shivam! Wishing you a fantastic year ahead filled with success and happiness 🎉
+
+Now write the birthday message.
+"""
 
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
+            {"role": "system", "content": "You write natural and friendly WhatsApp birthday messages."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.7
+        temperature=1,
+        max_tokens=120
     )
 
     return response.choices[0].message.content.strip()
