@@ -24,8 +24,9 @@ def start_whatsapp_session():
 
     wait = WebDriverWait(driver, 120)
 
+    # Wait until the chat sidebar appears (means WhatsApp fully loaded)
     wait.until(
-        EC.presence_of_element_located((By.XPATH, '//div[@title="Search input textbox"]'))
+        EC.presence_of_element_located((By.ID, "pane-side"))
     )
 
     print("WhatsApp ready")
