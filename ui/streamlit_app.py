@@ -2,7 +2,6 @@ import sys
 import os
 import time
 
-# Add project root to Python path
 sys.path.append(r"C:\Users\Yashovardhan\PyCharmMiscProject\birthday-whatsapp-ai")
 
 import streamlit as st
@@ -16,8 +15,6 @@ from app.whatsapp_sender import start_whatsapp_session, send_message, close_what
 st.set_page_config(page_title="Birthday AI Bot", page_icon="🎂")
 
 st.title("🎂 Birthday AI Message Generator")
-
-st.write("Upload your Excel file and send AI generated birthday wishes automatically.")
 
 
 uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx"])
@@ -37,26 +34,20 @@ if uploaded_file:
 
         messages = []
 
-        if birthdays.empty:
+        for _, row in birthdays.iterrows():
 
-            st.success("No birthdays today 🎉")
+            name = row["Name"]
+            phone = row["Phone"]
+            relationship = row.get("Relationship", "friend")
+            tone = row.get("Tone", "friendly")
 
-        else:
+            message = generate_message(name, relationship, tone)
 
-            for _, row in birthdays.iterrows():
-
-                name = row["Name"]
-                phone = row["Phone"]
-                relationship = row.get("Relationship", "friend")
-                tone = row.get("Tone", "friendly")
-
-                message = generate_message(name, relationship, tone)
-
-                messages.append({
-                    "Name": name,
-                    "Phone": phone,
-                    "Message": message
-                })
+            messages.append({
+                "Name": name,
+                "Phone": phone,
+                "Message": message
+            })
 
 
         st.session_state.messages = pd.DataFrame(messages)
@@ -64,9 +55,16 @@ if uploaded_file:
 
 if "messages" in st.session_state:
 
-    st.subheader("🎉 Generated Birthday Messages")
+    st.subheader("✏️ Edit Messages Before Sending")
 
-    st.dataframe(st.session_state.messages)
+    edited_df = st.data_editor(
+        st.session_state.messages,
+        num_rows="dynamic",
+        use_container_width=True
+    )
+
+    st.session_state.messages = edited_df
+
 
     if st.button("📲 Send WhatsApp Messages (Safe Mode)"):
 
@@ -75,12 +73,15 @@ if "messages" in st.session_state:
         driver = start_whatsapp_session()
 
         for _, row in st.session_state.messages.iterrows():
+
             phone = row["Phone"]
             message = row["Message"]
 
             send_message(driver, phone, message)
 
             st.write(f"✅ Sent to {row['Name']}")
+
+            time.sleep(7)
 
         close_whatsapp_session(driver)
 
