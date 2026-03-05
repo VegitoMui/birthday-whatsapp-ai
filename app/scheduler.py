@@ -53,11 +53,14 @@ def run_birthday_bot():
     close_whatsapp_session(driver)
 
     print("Finished sending messages")
-"""
-schedule.every().day.at("09:00").do(run_birthday_bot)
-schedule.every(6).hours.do(run_birthday_bot)
-"""
-schedule.every(10).seconds.do(run_birthday_bot)
+
+
+# Run immediately when script starts
+run_birthday_bot()
+
+# Then run every 3 hours
+schedule.every(3).hours.do(run_birthday_bot)
+
 print("Birthday bot scheduler started...")
 
 while True:
