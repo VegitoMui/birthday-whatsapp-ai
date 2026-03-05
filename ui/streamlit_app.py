@@ -48,3 +48,51 @@ else:
         df.sort_values(by="date", ascending=False),
         use_container_width=True
     )
+
+BIRTHDAY_FILE = "birthdays.xlsx"
+
+st.subheader("🎂 Upcoming Birthdays")
+
+if os.path.exists(BIRTHDAY_FILE):
+
+    df_birthdays = pd.read_excel(BIRTHDAY_FILE)
+
+    df_birthdays["Birthday"] = pd.to_datetime(df_birthdays["Birthday"])
+
+    today = datetime.now().date()
+
+    upcoming = []
+
+    for _, row in df_birthdays.iterrows():
+
+        birthday_this_year = row["Birthday"].replace(year=today.year).date()
+
+        days_until = (birthday_this_year - today).days
+
+        if days_until < 0:
+            birthday_this_year = row["Birthday"].replace(year=today.year + 1).date()
+            days_until = (birthday_this_year - today).days
+
+        if days_until <= 7:
+
+            upcoming.append({
+                "Name": row["Name"],
+                "Relationship": row.get("Relationship", ""),
+                "Days Away": days_until
+            })
+
+    upcoming_df = pd.DataFrame(upcoming)
+
+    if upcoming_df.empty:
+
+        st.info("No upcoming birthdays in next 7 days.")
+
+    else:
+
+        upcoming_df = upcoming_df.sort_values("Days Away")
+
+        st.dataframe(upcoming_df, use_container_width=True)
+
+else:
+
+    st.warning("Birthday Excel file not found.")
