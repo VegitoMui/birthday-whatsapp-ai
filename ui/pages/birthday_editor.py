@@ -14,6 +14,10 @@ if os.path.exists(BIRTHDAY_FILE):
 
     df = pd.read_excel(BIRTHDAY_FILE)
 
+    # Ensure Birthday column is editable date type
+    if "Birthday" in df.columns:
+        df["Birthday"] = pd.to_datetime(df["Birthday"]).dt.date
+
 else:
 
     df = pd.DataFrame(columns=[
@@ -25,7 +29,7 @@ else:
     ])
 
 # -----------------------------
-# Display editable table
+# Editable Table
 # -----------------------------
 
 st.subheader("Edit Birthday Database")
@@ -33,11 +37,17 @@ st.subheader("Edit Birthday Database")
 edited_df = st.data_editor(
     df,
     num_rows="dynamic",
-    use_container_width=True
+    use_container_width=True,
+    column_config={
+        "Birthday": st.column_config.DateColumn(
+            "Birthday",
+            format="YYYY-MM-DD"
+        )
+    }
 )
 
 # -----------------------------
-# Save changes
+# Save Changes Button
 # -----------------------------
 
 if st.button("💾 Save Changes"):
@@ -47,7 +57,7 @@ if st.button("💾 Save Changes"):
     st.success("Birthday database updated successfully!")
 
 # -----------------------------
-# Quick Add Section
+# Add New Birthday Form
 # -----------------------------
 
 st.subheader("➕ Add New Birthday")
@@ -74,16 +84,22 @@ with st.form("add_birthday"):
 
     if submitted:
 
-        new_row = pd.DataFrame([{
-            "Name": name,
-            "Phone": phone,
-            "Birthday": birthday,
-            "Relationship": relationship,
-            "Tone": tone
-        }])
+        if name and phone:
 
-        df = pd.concat([df, new_row], ignore_index=True)
+            new_row = pd.DataFrame([{
+                "Name": name,
+                "Phone": phone,
+                "Birthday": birthday,
+                "Relationship": relationship,
+                "Tone": tone
+            }])
 
-        df.to_excel(BIRTHDAY_FILE, index=False)
+            df = pd.concat([df, new_row], ignore_index=True)
 
-        st.success(f"Added birthday for {name}")
+            df.to_excel(BIRTHDAY_FILE, index=False)
+
+            st.success(f"Added birthday for {name}")
+
+        else:
+
+            st.error("Name and Phone are required!")
