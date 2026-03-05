@@ -55,7 +55,7 @@ def run_birthday_bot():
     print("Finished sending messages")
 
 
-# Run immediately when script starts
+
 run_birthday_bot()
 
 # Then run every 3 hours
