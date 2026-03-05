@@ -8,27 +8,29 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-
 def start_whatsapp_session():
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    options = webdriver.ChromeOptions()
+    options.add_argument("--start-maximized")
+
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=options
+    )
+
     driver.get("https://web.whatsapp.com")
 
     print("Please scan QR code if not logged in")
 
     wait = WebDriverWait(driver, 120)
 
-    # Wait until WhatsApp search bar appears
     wait.until(
-        EC.presence_of_element_located(
-            (By.XPATH, '//div[@title="Search input textbox"]')
-        )
+        EC.presence_of_element_located((By.XPATH, '//div[@title="Search input textbox"]'))
     )
 
-    print("WhatsApp fully loaded and ready")
+    print("WhatsApp ready")
 
     return driver
-
 
 def send_message(driver, phone, message):
 
