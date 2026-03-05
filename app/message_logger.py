@@ -6,18 +6,24 @@ LOG_DIR = "logs"
 LOG_FILE = os.path.join(LOG_DIR, "sent_messages.csv")
 
 
+# -------------------------
+# Ensure log file exists
+# -------------------------
+
 def initialize_log():
 
-    # Create logs folder if it doesn't exist
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
 
-    # Create CSV file with headers if it doesn't exist
     if not os.path.exists(LOG_FILE):
 
         df = pd.DataFrame(columns=["name", "phone", "message", "date"])
         df.to_csv(LOG_FILE, index=False)
 
+
+# -------------------------
+# Check if message already sent today
+# -------------------------
 
 def already_sent_today(phone):
 
@@ -36,6 +42,10 @@ def already_sent_today(phone):
 
     return not sent_today.empty
 
+
+# -------------------------
+# Log a new message
+# -------------------------
 
 def log_message(name, phone, message):
 
@@ -57,3 +67,5 @@ def log_message(name, phone, message):
     df = pd.concat([df, new_entry], ignore_index=True)
 
     df.to_csv(LOG_FILE, index=False)
+
+    print(f"Logged message for {name}")

@@ -1,11 +1,7 @@
 import time
 import schedule
-from app.message_logger import already_sent_today, log_message
-from app.excel_reader import get_today_birthdays
-from app.message_generator import generate_message
-from app.whatsapp_sender import start_whatsapp_session, send_message, close_whatsapp_session
 
-EXCEL_FILE = "birthdays.xlsx"
+from app.birthday_graph import run_birthday_graph
 
 
 def run_birthday_bot():
@@ -13,49 +9,18 @@ def run_birthday_bot():
     print("-------------------------------------------------")
     print("Scheduler triggered")
 
-    birthdays = get_today_birthdays(EXCEL_FILE)
+    try:
 
-    print("Birthday dataframe:")
-    print(birthdays)
+        run_birthday_graph()
 
-    if birthdays.empty:
-        print("No birthdays today.")
-        return
+        print("Birthday agent finished")
 
-    print("Opening WhatsApp...")
+    except Exception as e:
 
-    driver = start_whatsapp_session()
-
-    print("WhatsApp session started")
-
-    for _, row in birthdays.iterrows():
-
-        name = row["Name"]
-        phone = row["Phone"]
-
-        relationship = row.get("Relationship", "friend")
-        tone = row.get("Tone", "friendly")
-
-        if already_sent_today(phone):
-            print(f"Skipping {name} — already wished today")
-            continue
-
-        message = generate_message(name, relationship, tone)
-
-        print(f"Sending message to {name}")
-
-        send_message(driver, phone, message)
-
-        log_message(name, phone, message)
-
-        time.sleep(5)
-
-    close_whatsapp_session(driver)
-
-    print("Finished sending messages")
+        print("Error running birthday agent:", e)
 
 
-
+# Run once immediately
 run_birthday_bot()
 
 # Then run every 3 hours
@@ -63,6 +28,9 @@ schedule.every(3).hours.do(run_birthday_bot)
 
 print("Birthday bot scheduler started...")
 
+
 while True:
+
     schedule.run_pending()
+
     time.sleep(30)
