@@ -50,11 +50,11 @@ def generate_planned_messages():
     messages = []
 
     for _, row in upcoming.iterrows():
-
         message = generate_message(
             row["Name"],
             row["Relationship"],
-            row["Tone"]
+            row["Tone"],
+            row["Phone"]
         )
 
         messages.append(message)

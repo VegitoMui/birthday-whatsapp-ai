@@ -57,7 +57,7 @@ def generate_messages_node(state: BirthdayState):
         relationship = person.get("Relationship", "friend")
         tone = person.get("Tone", "friendly")
 
-        message = generate_message(name, relationship, tone)
+        message = generate_message(name, relationship, tone, phone)
 
         messages.append({
             "name": name,
