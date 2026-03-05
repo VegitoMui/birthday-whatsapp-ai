@@ -1,88 +1,50 @@
-import sys
-import os
-import time
-
-sys.path.append(r"C:\Users\Yashovardhan\PyCharmMiscProject\birthday-whatsapp-ai")
-
 import streamlit as st
 import pandas as pd
+import os
+from datetime import datetime
 
-from app.excel_reader import get_today_birthdays
-from app.message_generator import generate_message
-from app.whatsapp_sender import start_whatsapp_session, send_message, close_whatsapp_session
+LOG_FILE = "logs/sent_messages.csv"
 
+st.title("🎂 AI Birthday WhatsApp Automation Dashboard")
 
-st.set_page_config(page_title="Birthday AI Bot", page_icon="🎂")
+# -----------------------------
+# Load Log File
+# -----------------------------
 
-st.title("🎂 Birthday AI Message Generator")
+if os.path.exists(LOG_FILE):
+    df = pd.read_csv(LOG_FILE)
+else:
+    df = pd.DataFrame(columns=["name", "phone", "message", "date"])
 
+# -----------------------------
+# Metrics Section
+# -----------------------------
 
-uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx"])
+st.subheader("📊 Birthday Wish Statistics")
 
+total_wishes = len(df)
+unique_people = df["phone"].nunique() if not df.empty else 0
 
-if uploaded_file:
+today = datetime.now().strftime("%Y-%m-%d")
 
-    df = pd.read_excel(uploaded_file, engine="openpyxl")
+today_wishes = len(df[df["date"] == today]) if not df.empty else 0
 
-    st.subheader("📊 Uploaded Data")
-    st.dataframe(df)
+col1, col2, col3 = st.columns(3)
 
+col1.metric("Total Wishes Sent", total_wishes)
+col2.metric("Unique People Wished", unique_people)
+col3.metric("Today's Wishes", today_wishes)
 
-    if st.button("🎉 Generate Birthday Messages"):
+# -----------------------------
+# Message History
+# -----------------------------
 
-        birthdays = get_today_birthdays(uploaded_file)
+st.subheader("📜 Message History")
 
-        messages = []
-
-        for _, row in birthdays.iterrows():
-
-            name = row["Name"]
-            phone = row["Phone"]
-            relationship = row.get("Relationship", "friend")
-            tone = row.get("Tone", "friendly")
-
-            message = generate_message(name, relationship, tone)
-
-            messages.append({
-                "Name": name,
-                "Phone": phone,
-                "Message": message
-            })
-
-
-        st.session_state.messages = pd.DataFrame(messages)
-
-
-if "messages" in st.session_state:
-
-    st.subheader("✏️ Edit Messages Before Sending")
-
-    edited_df = st.data_editor(
-        st.session_state.messages,
-        num_rows="dynamic",
+if df.empty:
+    st.info("No birthday messages sent yet.")
+else:
+    st.dataframe(
+        df.sort_values(by="date", ascending=False),
         use_container_width=True
     )
-
-    st.session_state.messages = edited_df
-
-
-    if st.button("📲 Send WhatsApp Messages (Safe Mode)"):
-
-        st.write("Starting WhatsApp session...")
-
-        driver = start_whatsapp_session()
-
-        for _, row in st.session_state.messages.iterrows():
-
-            phone = row["Phone"]
-            message = row["Message"]
-
-            send_message(driver, phone, message)
-
-            st.write(f"✅ Sent to {row['Name']}")
-
-            time.sleep(7)
-
-        close_whatsapp_session(driver)
-
-        st.success("🎉 All messages sent successfully!")
