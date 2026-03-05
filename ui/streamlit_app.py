@@ -1,8 +1,23 @@
 import streamlit as st
 import pandas as pd
-import os
 from datetime import datetime
+import sys
+import os
 
+# Add project root to Python path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(PROJECT_ROOT)
+from app.birthday_graph import run_birthday_graph
+
+st.subheader("⚙️ Bot Controls")
+
+if st.button("Run Birthday Bot Now"):
+
+    with st.spinner("Running birthday bot..."):
+
+        run_birthday_graph()
+
+    st.success("Birthday bot finished!")
 LOG_FILE = "logs/sent_messages.csv"
 
 st.title("🎂 AI Birthday WhatsApp Automation Dashboard")
